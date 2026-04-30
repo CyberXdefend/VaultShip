@@ -1,6 +1,6 @@
 pub async fn run(profile: &str) -> anyhow::Result<()> {
     let template = match profile {
-        "baseline" => include_str!("../../../../vaultship.toml.example").to_string(),
+        "baseline" => include_str!("../../assets/vaultship.toml.example").to_string(),
         "strict" => strict_template(),
         "high-assurance" => high_assurance_template(),
         other => anyhow::bail!("Unknown profile `{other}`. Use baseline|strict|high-assurance"),

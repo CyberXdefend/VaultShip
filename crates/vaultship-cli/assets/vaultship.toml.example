@@ -1,0 +1,17 @@
+[profile]
+name = "baseline"
+
+[project]
+name = "vaultship-demo"
+
+[harden]
+read_only = true
+drop_capabilities = true
+no_new_privileges = true
+seccomp_profile = "auto"
+anti_debug = true
+
+[bind]
+enabled = true
+hardware_required = false
+public_key_path = "./keys/vaultship.public.key"
