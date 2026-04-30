@@ -1,0 +1,13 @@
+[project]
+name = "vaultship-production"
+
+[harden]
+read_only = true
+drop_capabilities = true
+no_new_privileges = true
+seccomp_profile = "strict"
+anti_debug = true
+
+[license]
+product = "vaultship-production"
+public_key_path = "/etc/vaultship/vaultship.public.key"

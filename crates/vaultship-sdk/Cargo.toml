@@ -1,0 +1,16 @@
+[package]
+name = "vaultship-sdk"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+ed25519-dalek.workspace = true
+base64.workspace = true
+vaultship-license = { path = "../vaultship-license" }

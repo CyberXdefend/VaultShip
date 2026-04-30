@@ -1,0 +1,13 @@
+[project]
+name = "vaultship-demo"
+
+[harden]
+read_only = true
+drop_capabilities = true
+no_new_privileges = true
+seccomp_profile = "auto"
+anti_debug = true
+
+[license]
+product = "vaultship-demo"
+public_key_path = "./vaultship.public.key"

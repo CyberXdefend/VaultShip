@@ -1,0 +1,17 @@
+[profile]
+name = "strict"
+
+[project]
+name = "vaultship-demo"
+
+[harden]
+read_only = true
+drop_capabilities = true
+no_new_privileges = true
+seccomp_profile = "strict"
+anti_debug = true
+
+[bind]
+enabled = true
+hardware_required = true
+public_key_path = "./vaultship.public.key"

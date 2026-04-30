@@ -1,0 +1,5 @@
+services:
+  sample-app:
+    image: sample-app:latest
+    ports:
+      - "8080:8080"

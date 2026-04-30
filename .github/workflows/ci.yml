@@ -1,0 +1,28 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build --workspace
+      - run: cargo test --workspace
+      - run: cargo clippy --workspace -- -D warnings
+      - run: cargo fmt --check
+      - run: cargo run -p vaultship-cli -- init --profile baseline
+      - run: cargo run -p vaultship-cli -- keygen --name ci
+      - run: |
+          cat > docker-compose.yml <<'EOF'
+          services:
+            api:
+              image: demo:latest
+          EOF
+      - run: cargo run -p vaultship-cli -- build docker-compose.yml
+      - run: cargo run -p vaultship-cli -- inspect api --json
+      - run: cargo run -p vaultship-cli -- verify api --json

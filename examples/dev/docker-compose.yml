@@ -1,0 +1,5 @@
+services:
+  api:
+    image: vaultship-demo-api:latest
+    ports:
+      - "8080:8080"

@@ -1,0 +1,9 @@
+{
+  "artifact": ".vaultship/artifacts/sample-app.layer.enc.json",
+  "hardened_compose": "docker-compose.hardened.yml",
+  "key": ".vaultship/keys/sample-app.key",
+  "seccomp_profile": "seccomp-profile.json",
+  "service": "sample-app",
+  "signed_ref": "sample-app@sig:f7bb45de9eb817857cab84959d8734bfc30820bba0a9832828bd640de3431d41",
+  "source_compose": "tests/fixtures/sample-app/docker-compose.yml"
+}
