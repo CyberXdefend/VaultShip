@@ -13,4 +13,4 @@ serde_json.workspace = true
 tracing.workspace = true
 ed25519-dalek.workspace = true
 base64.workspace = true
-vaultship-license = { path = "../vaultship-license" }
+vaultship-license = { path = "../vaultship-license", version = "0.1.0" }
