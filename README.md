@@ -29,6 +29,28 @@ cargo build --workspace
 cargo run -p vaultship-cli -- --help
 ```
 
+## Binary Distribution
+
+```bash
+# crates.io
+cargo install vaultship-cli
+
+# install script (from GitHub repo)
+curl -fsSL https://raw.githubusercontent.com/cyberxdefend/vaultship/main/scripts/install.sh | sh
+
+# direct binaries
+https://github.com/cyberxdefend/vaultship/releases
+```
+
+Packaging templates for additional distribution channels are available under `packaging/`:
+
+- Homebrew: `packaging/homebrew/Formula/vaultship.rb`
+- Snap: `packaging/snap/snapcraft.yaml`
+- AUR: `packaging/aur/PKGBUILD`
+- Chocolatey: `packaging/chocolatey/vaultship.nuspec`
+- winget: `packaging/winget/vaultship.yaml`
+- Nix: `packaging/nix/default.nix`
+
 ## Developer Workflow
 
 ```bash

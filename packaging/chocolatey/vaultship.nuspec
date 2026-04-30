@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>vaultship</id>
+    <version>0.1.0</version>
+    <title>VaultShip</title>
+    <authors>cyberxdefend</authors>
+    <projectUrl>https://github.com/cyberxdefend/vaultship</projectUrl>
+    <licenseUrl>https://github.com/cyberxdefend/vaultship/blob/main/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>VaultShip CLI for container artifact protection.</description>
+    <tags>containers docker security encryption</tags>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

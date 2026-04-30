@@ -1,0 +1,14 @@
+pkgname=vaultship
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Encrypt, harden, bind, and sign container artifacts"
+arch=('x86_64')
+url="https://github.com/cyberxdefend/vaultship"
+license=('Apache')
+depends=('glibc')
+source=("vaultship-v${pkgver}-x86_64-unknown-linux-gnu.tar.gz::https://github.com/cyberxdefend/vaultship/releases/download/v${pkgver}/vaultship-v${pkgver}-x86_64-unknown-linux-gnu.tar.gz")
+sha256sums=('REPLACE_WITH_SHA256')
+
+package() {
+  install -Dm755 "${srcdir}/vaultship" "${pkgdir}/usr/bin/vaultship"
+}

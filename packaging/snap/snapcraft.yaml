@@ -1,0 +1,21 @@
+name: vaultship
+base: core22
+version: "0.1.0"
+summary: Protect container artifacts with encryption and hardening
+description: |
+  VaultShip encrypts, hardens, signs, and machine-binds container artifacts.
+
+grade: stable
+confinement: strict
+
+apps:
+  vaultship:
+    command: bin/vaultship
+    plugs: [network, home]
+
+parts:
+  vaultship:
+    plugin: dump
+    source: https://github.com/cyberxdefend/vaultship/releases/download/v0.1.0/vaultship-v0.1.0-x86_64-unknown-linux-gnu.tar.gz
+    organize:
+      vaultship: bin/vaultship

@@ -1,0 +1,13 @@
+PackageIdentifier: cyberxdefend.vaultship
+PackageVersion: 0.1.0
+PackageName: VaultShip
+Publisher: cyberxdefend
+License: Apache-2.0
+ShortDescription: Protect container artifacts with encryption and hardening.
+ManifestType: singleton
+ManifestVersion: 1.6.0
+Installers:
+  - Architecture: x64
+    InstallerType: zip
+    InstallerUrl: https://github.com/cyberxdefend/vaultship/releases/download/v0.1.0/vaultship-v0.1.0-x86_64-pc-windows-msvc.zip
+    InstallerSha256: REPLACE_WITH_SHA256
