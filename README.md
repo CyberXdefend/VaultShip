@@ -70,3 +70,48 @@ cargo run -p vaultship-cli -- run api --bind-file vaultship.bind.json --public-k
 - Protection profiles: `docs/protection-profiles.md`
 - Exit codes: `docs/exit-codes.md`
 - Observability: `docs/observability.md`
+
+## Use VaultShip In Your Project
+
+### Option A: Install CLI on Host
+
+```bash
+# Install from crates.io
+cargo install vaultship-cli
+
+# Protect an existing compose service
+vaultship init --profile baseline
+vaultship build docker-compose.yml
+vaultship inspect api --json
+
+# Create and enforce machine binding
+vaultship keygen --name vaultship
+vaultship fingerprint > fingerprint.json
+vaultship bind --key-file vaultship.layer.key --private-key vaultship.private.key --fingerprint fingerprint.json --output vaultship.bind.json
+vaultship run api --bind-file vaultship.bind.json --public-key vaultship.public.key --dry-run
+```
+
+### Option B: Use VaultShip Container In CI/CD
+
+```bash
+docker run --rm -v "$PWD":/workspace -w /workspace ghcr.io/cyberxdefend/vaultship:latest \
+  vaultship build docker-compose.yml
+
+docker run --rm -v "$PWD":/workspace -w /workspace ghcr.io/cyberxdefend/vaultship:latest \
+  vaultship inspect api --json
+```
+
+### Option C: Use VaultShip Crates In Rust Code
+
+```toml
+[dependencies]
+vaultship-encrypt = "0.1.0"
+vaultship-harden = "0.1.0"
+vaultship-sign = "0.1.0"
+```
+
+```rust
+let hardened = vaultship_harden::harden_compose_document(compose_yaml, &config)?;
+let encrypted = vaultship_encrypt::encrypt::encrypt_layer(bytes, &key)?;
+vaultship_sign::verify::verify_signature(signed_ref)?;
+```
