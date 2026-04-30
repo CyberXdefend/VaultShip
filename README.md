@@ -2,6 +2,8 @@
 
 VaultShip is a protected container runtime toolkit for hardening, signing, hardware-binding, and encrypting containerized software.
 
+VaultShip: protected container delivery for commercial self-hosted software.
+
 ## Why VaultShip
 
 VaultShip helps teams protect containerized software with stronger anti-tamper controls and machine-bound execution controls.
