@@ -1,0 +1,22 @@
+# VaultShip
+
+> Encrypt, harden, bind, and sign Docker/OCI containers against extraction and unauthorized execution.
+
+## What is VaultShip?
+VaultShip is an open-source Rust CLI for container-level protection. It encrypts OCI artifacts, hardens runtime defaults, verifies signatures, and enforces machine-bound execution.
+
+## Core Features
+- AES-256-GCM encryption for OCI layer artifacts
+- Compose hardening and seccomp profile generation
+- Hardware binding with signed bound-key files
+- Signature verification with optional cosign enforcement
+- OCI registry push/pull support with auth hooks
+
+## Install
+- Source: `cargo build --workspace`
+- Repository: `https://github.com/cyberxdefend/vaultship`
+- Docs: `https://vaultship.cyberxdefend.com`
+
+## Image Registries
+- `ghcr.io/cyberxdefend/vaultship`
+- `docker.io/cyberxdefend/vaultship`

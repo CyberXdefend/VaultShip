@@ -1,0 +1,98 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  binaries:
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            ext: ""
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+            ext: ""
+          - target: x86_64-apple-darwin
+            os: macos-latest
+            ext: ""
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            ext: ""
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            ext: ".exe"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - run: cargo build --release --target ${{ matrix.target }} -p vaultship-cli
+      - name: Package artifact (unix)
+        if: runner.os != 'Windows'
+        run: |
+          mkdir -p dist
+          cp target/${{ matrix.target }}/release/vaultship dist/
+          tar -czf vaultship-${{ github.ref_name }}-${{ matrix.target }}.tar.gz -C dist vaultship
+      - name: Package artifact (windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path dist -Force | Out-Null
+          Copy-Item "target/${{ matrix.target }}/release/vaultship.exe" "dist/vaultship.exe"
+          Compress-Archive -Path "dist/vaultship.exe" -DestinationPath "vaultship-${{ github.ref_name }}-${{ matrix.target }}.zip"
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: vaultship-${{ matrix.target }}
+          path: |
+            *.tar.gz
+            *.zip
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/login-action@v3
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          push: true
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            docker.io/cyberxdefend/vaultship:${{ github.ref_name }}
+            docker.io/cyberxdefend/vaultship:latest
+            ghcr.io/cyberxdefend/vaultship:${{ github.ref_name }}
+            ghcr.io/cyberxdefend/vaultship:latest
+            quay.io/cyberxdefend/vaultship:${{ github.ref_name }}
+            quay.io/cyberxdefend/vaultship:latest
+
+  github-release:
+    needs: [binaries, docker]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            **/*.tar.gz
+            **/*.zip
