@@ -55,7 +55,12 @@ pub async fn run(
     docker_args.push(image.to_string());
 
     if dry_run {
-        println!("Dry-run {} command: {} {}", engine, engine, docker_args.join(" "));
+        println!(
+            "Dry-run {} command: {} {}",
+            engine,
+            engine,
+            docker_args.join(" ")
+        );
         return Ok(());
     }
 

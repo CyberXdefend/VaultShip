@@ -1,0 +1,30 @@
+[package]
+name = "vaultship-integration-tests"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[[test]]
+name = "test_encrypt_decrypt"
+path = "integration/test_encrypt_decrypt.rs"
+
+[[test]]
+name = "test_license_flow"
+path = "integration/test_license_flow.rs"
+
+[[test]]
+name = "test_build_harden"
+path = "integration/test_build_harden.rs"
+
+[[test]]
+name = "test_full_pipeline"
+path = "integration/test_full_pipeline.rs"
+
+[dev-dependencies]
+vaultship-encrypt = { path = "../crates/vaultship-encrypt", version = "0.1.0" }
+vaultship-harden = { path = "../crates/vaultship-harden", version = "0.1.0" }
+vaultship-license = { path = "../crates/vaultship-license", version = "0.1.0" }
+vaultship-sign = { path = "../crates/vaultship-sign", version = "0.1.0" }
+ed25519-dalek.workspace = true
+base64.workspace = true
+chrono.workspace = true

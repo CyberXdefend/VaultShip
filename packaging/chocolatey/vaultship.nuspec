@@ -1,15 +1,31 @@
 <?xml version="1.0"?>
-<package>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
   <metadata>
     <id>vaultship</id>
     <version>0.1.0</version>
     <title>VaultShip</title>
     <authors>cyberxdefend</authors>
+    <owners>cyberxdefend</owners>
     <projectUrl>https://github.com/cyberxdefend/vaultship</projectUrl>
     <licenseUrl>https://github.com/cyberxdefend/vaultship/blob/main/LICENSE</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>VaultShip CLI for container artifact protection.</description>
-    <tags>containers docker security encryption</tags>
+    <projectSourceUrl>https://github.com/cyberxdefend/vaultship</projectSourceUrl>
+    <bugTrackerUrl>https://github.com/cyberxdefend/vaultship/issues</bugTrackerUrl>
+    <description>
+VaultShip is a CLI tool for container artifact security:
+
+- AES-256-GCM encryption of Docker image layers
+- Docker Compose hardening (read-only FS, cap_drop ALL, seccomp profiles)
+- Ed25519 image reference signing and verification
+- Hardware-bound key binding (MAC address, disk serial, hostname)
+- License management for controlled distribution
+    </description>
+    <summary>Protect container artifacts with encryption, hardening, and signing.</summary>
+    <releaseNotes>https://github.com/cyberxdefend/vaultship/releases</releaseNotes>
+    <copyright>Copyright 2024 cyberxdefend</copyright>
+    <tags>containers docker security encryption hardening signing devops cli</tags>
+    <docsUrl>https://github.com/cyberxdefend/vaultship/tree/main/docs</docsUrl>
+    <iconUrl>https://raw.githubusercontent.com/cyberxdefend/vaultship/main/docs/assets/logo.png</iconUrl>
   </metadata>
   <files>
     <file src="tools\**" target="tools" />

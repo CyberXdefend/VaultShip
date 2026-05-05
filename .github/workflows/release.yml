@@ -130,7 +130,9 @@ jobs:
           publish_crate vaultship-cli
 
   github-release:
-    needs: [binaries, docker, publish-crates]
+    # Publish GitHub release as soon as binaries are ready so packaging
+    # jobs can start downloading the release assets immediately.
+    needs: [binaries]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -145,3 +147,196 @@ jobs:
             **/*.tar.gz
             **/*.zip
             checksums.txt
+
+  linux-packages:
+    needs: [github-release]
+    environment: prod
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install nfpm
+        run: |
+          curl -sfL https://github.com/goreleaser/nfpm/releases/download/v2.38.0/nfpm_2.38.0_Linux_x86_64.tar.gz \
+            | tar -xz nfpm
+          sudo mv nfpm /usr/local/bin/nfpm
+      - name: Build amd64 packages
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          VERSION_CLEAN="${VERSION#v}"
+          curl -sfL "https://github.com/cyberxdefend/vaultship/releases/download/${VERSION}/vaultship-${VERSION}-x86_64-unknown-linux-gnu.tar.gz" \
+            | tar -xz
+          chmod +x vaultship
+          ARCH=amd64 VERSION="${VERSION_CLEAN}" envsubst < packaging/nfpm.yaml > /tmp/nfpm.yaml
+          nfpm package --config /tmp/nfpm.yaml --packager deb \
+            --target "vaultship-${VERSION}-amd64.deb"
+          nfpm package --config /tmp/nfpm.yaml --packager rpm \
+            --target "vaultship-${VERSION}-x86_64.rpm"
+      - name: Build arm64 packages
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          VERSION_CLEAN="${VERSION#v}"
+          rm -f vaultship
+          curl -sfL "https://github.com/cyberxdefend/vaultship/releases/download/${VERSION}/vaultship-${VERSION}-aarch64-unknown-linux-gnu.tar.gz" \
+            | tar -xz
+          chmod +x vaultship
+          ARCH=arm64 VERSION="${VERSION_CLEAN}" envsubst < packaging/nfpm.yaml > /tmp/nfpm.yaml
+          nfpm package --config /tmp/nfpm.yaml --packager deb \
+            --target "vaultship-${VERSION}-arm64.deb"
+          nfpm package --config /tmp/nfpm.yaml --packager rpm \
+            --target "vaultship-${VERSION}-aarch64.rpm"
+      - name: Upload .deb and .rpm to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            *.deb
+            *.rpm
+
+  homebrew-tap:
+    needs: [github-release]
+    environment: prod
+    runs-on: ubuntu-latest
+    steps:
+      - uses: mislav/bump-homebrew-formula-action@v3
+        with:
+          formula-name: vaultship
+          formula-path: Formula/vaultship.rb
+          homebrew-tap: cyberxdefend/homebrew-vaultship
+          base-branch: main
+          tag-name: ${{ github.ref_name }}
+          create-pullrequest: false
+        env:
+          COMMITTER_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+
+  snap:
+    needs: [github-release]
+    environment: prod
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update version and source URL in snapcraft.yaml
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          VERSION_CLEAN="${VERSION#v}"
+          sed -i "s/^version: .*/version: \"${VERSION_CLEAN}\"/" packaging/snap/snapcraft.yaml
+          sed -i "s|releases/download/v[^/]*/vaultship-v[^-]*-|releases/download/${VERSION}/vaultship-${VERSION}-|g" \
+            packaging/snap/snapcraft.yaml
+      - uses: snapcore/action-build@v1
+        id: build
+        with:
+          path: packaging/snap
+      - uses: snapcore/action-publish@v1
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_TOKEN }}
+        with:
+          snap: ${{ steps.build.outputs.snap }}
+          release: stable
+
+  aur:
+    needs: [github-release]
+    environment: prod
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update PKGBUILD with version and real checksums
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          VERSION_CLEAN="${VERSION#v}"
+          X86_URL="https://github.com/cyberxdefend/vaultship/releases/download/${VERSION}/vaultship-${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+          AARCH64_URL="https://github.com/cyberxdefend/vaultship/releases/download/${VERSION}/vaultship-${VERSION}-aarch64-unknown-linux-gnu.tar.gz"
+          X86_SHA=$(curl -sL "${X86_URL}" | sha256sum | awk '{print $1}')
+          AARCH64_SHA=$(curl -sL "${AARCH64_URL}" | sha256sum | awk '{print $1}')
+          sed -i "s/^pkgver=.*/pkgver=${VERSION_CLEAN}/" packaging/aur/PKGBUILD
+          sed -i "s/SHA256_X86_64_PLACEHOLDER/${X86_SHA}/" packaging/aur/PKGBUILD
+          sed -i "s/SHA256_AARCH64_PLACEHOLDER/${AARCH64_SHA}/" packaging/aur/PKGBUILD
+      - uses: KSXGitHub/github-actions-deploy-aur@v2.7.0
+        with:
+          pkgname: vaultship-bin
+          pkgbuild: packaging/aur/PKGBUILD
+          commit_username: vaultship-release-bot
+          commit_email: releases@cyberxdefend.com
+          ssh_private_key: ${{ secrets.AUR_SSH_KEY }}
+          commit_message: "upgpkg: vaultship-bin ${{ github.ref_name }}"
+
+  chocolatey:
+    needs: [github-release]
+    environment: prod
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compute SHA256 and update files
+        shell: pwsh
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          $ver = $env:VERSION.TrimStart('v')
+          $zipUrl = "https://github.com/cyberxdefend/vaultship/releases/download/$env:VERSION/vaultship-$env:VERSION-x86_64-pc-windows-msvc.zip"
+          $tmp = New-TemporaryFile
+          Invoke-WebRequest -Uri $zipUrl -OutFile $tmp.FullName
+          $sha = (Get-FileHash $tmp.FullName -Algorithm SHA256).Hash.ToLower()
+          Remove-Item $tmp.FullName
+
+          (Get-Content packaging/chocolatey/vaultship.nuspec) `
+            -replace '<version>.*</version>', "<version>$ver</version>" |
+            Set-Content packaging/chocolatey/vaultship.nuspec
+
+          (Get-Content packaging/chocolatey/tools/chocolateyInstall.ps1) `
+            -replace 'VERSION_PLACEHOLDER', $env:VERSION `
+            -replace 'SHA256_PLACEHOLDER', $sha |
+            Set-Content packaging/chocolatey/tools/chocolateyInstall.ps1
+      - name: Pack and push to Chocolatey
+        shell: pwsh
+        working-directory: packaging/chocolatey
+        env:
+          CHOCOLATEY_API_KEY: ${{ secrets.CHOCOLATEY_API_KEY }}
+        run: |
+          choco pack vaultship.nuspec
+          $nupkg = (Get-Item *.nupkg).Name
+          choco push $nupkg --source https://push.chocolatey.org/ --api-key $env:CHOCOLATEY_API_KEY
+
+  winget:
+    needs: [github-release]
+    environment: prod
+    runs-on: ubuntu-latest
+    steps:
+      - uses: vedantmgoyal9/winget-releaser@v2
+        with:
+          identifier: cyberxdefend.VaultShip
+          version: ${{ github.ref_name }}
+          installers-regex: 'x86_64-pc-windows-msvc\.zip$'
+          token: ${{ secrets.WINGET_TOKEN }}
+
+  scoop:
+    needs: [github-release]
+    environment: prod
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: cyberxdefend/scoop-vaultship
+          token: ${{ secrets.SCOOP_BUCKET_TOKEN }}
+          path: scoop-bucket
+      - name: Update Scoop manifest
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          VERSION_CLEAN="${VERSION#v}"
+          ZIP_URL="https://github.com/cyberxdefend/vaultship/releases/download/${VERSION}/vaultship-${VERSION}-x86_64-pc-windows-msvc.zip"
+          SHA256=$(curl -sL "${ZIP_URL}" | sha256sum | awk '{print $1}')
+          jq --arg v "$VERSION_CLEAN" \
+             --arg url "$ZIP_URL" \
+             --arg hash "sha256:${SHA256}" \
+             '.version = $v | .url = $url | .hash = $hash' \
+             scoop-bucket/vaultship.json > /tmp/vaultship.json
+          mv /tmp/vaultship.json scoop-bucket/vaultship.json
+      - name: Commit and push
+        working-directory: scoop-bucket
+        run: |
+          git config user.name "vaultship-release-bot"
+          git config user.email "releases@cyberxdefend.com"
+          git add vaultship.json
+          git commit -m "Update to ${{ github.ref_name }}"
+          git push

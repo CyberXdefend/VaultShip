@@ -47,7 +47,15 @@ impl From<&License> for LicensePayload {
 }
 
 impl License {
-    pub fn create(signing_key: &SigningKey, customer: &str, product: &str, fingerprint: Option<HardwareFingerprint>, expires_at: Option<DateTime<Utc>>, seats: u32, features: Vec<String>) -> Result<Self> {
+    pub fn create(
+        signing_key: &SigningKey,
+        customer: &str,
+        product: &str,
+        fingerprint: Option<HardwareFingerprint>,
+        expires_at: Option<DateTime<Utc>>,
+        seats: u32,
+        features: Vec<String>,
+    ) -> Result<Self> {
         let license = Self {
             id: uuid::Uuid::new_v4(),
             customer: customer.to_string(),

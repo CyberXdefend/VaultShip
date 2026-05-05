@@ -56,7 +56,8 @@ pub fn validate_bound_file(path: &str, public_key_path: &str) -> anyhow::Result<
     };
     let payload_bytes = serde_json::to_vec(&payload)?;
 
-    let sig_bytes = base64::engine::general_purpose::STANDARD.decode(bound.signature_base64.trim())?;
+    let sig_bytes =
+        base64::engine::general_purpose::STANDARD.decode(bound.signature_base64.trim())?;
     let sig_arr: [u8; 64] = sig_bytes
         .try_into()
         .map_err(|_| anyhow::anyhow!("Invalid signature length in bound file"))?;
@@ -77,7 +78,8 @@ pub fn validate_bound_file(path: &str, public_key_path: &str) -> anyhow::Result<
 }
 
 fn load_signing_key(path: &str) -> anyhow::Result<SigningKey> {
-    let key_bytes = base64::engine::general_purpose::STANDARD.decode(std::fs::read_to_string(path)?.trim())?;
+    let key_bytes =
+        base64::engine::general_purpose::STANDARD.decode(std::fs::read_to_string(path)?.trim())?;
     let key: [u8; 32] = key_bytes
         .try_into()
         .map_err(|_| anyhow::anyhow!("Private key must be 32 bytes"))?;
@@ -85,7 +87,8 @@ fn load_signing_key(path: &str) -> anyhow::Result<SigningKey> {
 }
 
 fn load_public_key(path: &str) -> anyhow::Result<VerifyingKey> {
-    let key_bytes = base64::engine::general_purpose::STANDARD.decode(std::fs::read_to_string(path)?.trim())?;
+    let key_bytes =
+        base64::engine::general_purpose::STANDARD.decode(std::fs::read_to_string(path)?.trim())?;
     let key: [u8; 32] = key_bytes
         .try_into()
         .map_err(|_| anyhow::anyhow!("Public key must be 32 bytes"))?;

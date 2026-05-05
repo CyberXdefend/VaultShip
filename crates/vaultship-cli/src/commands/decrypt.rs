@@ -15,7 +15,8 @@ pub async fn run(input: &str, output: Option<&str>, key_file: &str) -> anyhow::R
 }
 
 fn read_key(path: &str) -> anyhow::Result<[u8; 32]> {
-    let raw = base64::engine::general_purpose::STANDARD.decode(std::fs::read_to_string(path)?.trim())?;
+    let raw =
+        base64::engine::general_purpose::STANDARD.decode(std::fs::read_to_string(path)?.trim())?;
     raw.try_into()
         .map_err(|_| anyhow::anyhow!("Encryption key must be 32 bytes in base64"))
 }

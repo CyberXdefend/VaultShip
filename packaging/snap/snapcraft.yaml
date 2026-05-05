@@ -3,7 +3,9 @@ base: core22
 version: "0.1.0"
 summary: Protect container artifacts with encryption and hardening
 description: |
-  VaultShip encrypts, hardens, signs, and machine-binds container artifacts.
+  VaultShip encrypts Docker image layers with AES-256-GCM, hardens Docker Compose
+  configs (read-only filesystem, capability drops, seccomp profiles), binds
+  artifacts to hardware fingerprints, and signs image references with Ed25519.
 
 grade: stable
 confinement: strict
@@ -11,7 +13,10 @@ confinement: strict
 apps:
   vaultship:
     command: bin/vaultship
-    plugs: [network, home]
+    plugs:
+      - network
+      - home
+      - docker
 
 parts:
   vaultship:

@@ -19,11 +19,15 @@ pub fn validate_license(license: &License, public_key: &VerifyingKey) -> Result<
         .verify(payload.as_bytes(), &signature)
         .map_err(|_| anyhow::anyhow!("Invalid license signature"))?;
 
-    if let Some(expires) = license.expires_at && Utc::now() > expires {
+    if let Some(expires) = license.expires_at
+        && Utc::now() > expires
+    {
         bail!("License expired on {expires}");
     }
 
-    if let Some(ref expected_fp) = license.hardware_fingerprint && !expected_fp.verify_current()? {
+    if let Some(ref expected_fp) = license.hardware_fingerprint
+        && !expected_fp.verify_current()?
+    {
         bail!("License not valid for this hardware");
     }
 

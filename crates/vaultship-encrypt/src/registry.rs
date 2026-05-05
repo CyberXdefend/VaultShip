@@ -106,6 +106,9 @@ pub async fn push_encrypted_layer(reference: &str, layer: &EncryptedLayer) -> Re
         }],
     };
 
+    let manifest_json = serde_json::to_string(&manifest)?;
+    let annotated_json = crate::oci::annotate_manifest_for_encryption(&manifest_json)?;
+
     let manifest_url = format!(
         "{}://{}/v2/{}/manifests/{}",
         parsed.scheme, parsed.registry, parsed.repository, parsed.tag
@@ -114,7 +117,7 @@ pub async fn push_encrypted_layer(reference: &str, layer: &EncryptedLayer) -> Re
         client
             .put(manifest_url)
             .header(CONTENT_TYPE, MANIFEST_MEDIA)
-            .body(serde_json::to_vec(&manifest)?),
+            .body(annotated_json.into_bytes()),
         &auth,
     )
     .send()
@@ -279,8 +282,8 @@ fn apply_auth(
 ) -> reqwest::RequestBuilder {
     match auth {
         Some(RegistryAuth::Basic { username, password }) => {
-            let token = base64::engine::general_purpose::STANDARD
-                .encode(format!("{username}:{password}"));
+            let token =
+                base64::engine::general_purpose::STANDARD.encode(format!("{username}:{password}"));
             builder.header("Authorization", format!("Basic {token}"))
         }
         Some(RegistryAuth::Bearer(token)) => {

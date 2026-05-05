@@ -21,8 +21,8 @@ jobs:
           cat > docker-compose.yml <<'EOF'
           services:
             api:
-              image: demo:latest
+              image: alpine:latest
           EOF
       - run: cargo run -p vaultship-cli -- build docker-compose.yml
       - run: cargo run -p vaultship-cli -- inspect api --json
-      - run: cargo run -p vaultship-cli -- verify api --json
+      - run: cargo run -p vaultship-cli -- verify api --json --public-key vaultship.public.key

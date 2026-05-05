@@ -1,6 +1,6 @@
-pub async fn run(image_or_ref: &str, json: bool) -> anyhow::Result<()> {
-    if image_or_ref.contains("@") {
-        vaultship_sign::verify::verify_signature(image_or_ref)?;
+pub async fn run(image_or_ref: &str, json: bool, public_key: &str) -> anyhow::Result<()> {
+    if image_or_ref.contains("@sig:") {
+        vaultship_sign::verify::verify_signature(image_or_ref, public_key)?;
         if json {
             println!(
                 "{}",
@@ -15,14 +15,17 @@ pub async fn run(image_or_ref: &str, json: bool) -> anyhow::Result<()> {
         return Ok(());
     }
 
-    let manifest = std::path::Path::new(".vaultship/artifacts").join(format!("{image_or_ref}.manifest.json"));
+    let manifest =
+        std::path::Path::new(".vaultship/artifacts").join(format!("{image_or_ref}.manifest.json"));
     if !manifest.exists() {
-        anyhow::bail!("No manifest for `{image_or_ref}`. Provide signed ref or build artifact first.");
+        anyhow::bail!(
+            "No manifest for `{image_or_ref}`. Provide a signed ref (contains @sig:) or build artifact first."
+        );
     }
 
     let value: serde_json::Value = serde_json::from_str(&std::fs::read_to_string(manifest)?)?;
     let signed_ref = value["signed_ref"].as_str().unwrap_or_default();
-    vaultship_sign::verify::verify_signature(signed_ref)?;
+    vaultship_sign::verify::verify_signature(signed_ref, public_key)?;
     if json {
         println!(
             "{}",

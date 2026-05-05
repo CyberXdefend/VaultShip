@@ -1,9 +1,0 @@
-{
-  "artifact": ".vaultship/artifacts/api.layer.enc.json",
-  "hardened_compose": "docker-compose.hardened.yml",
-  "key": ".vaultship/keys/api.key",
-  "seccomp_profile": "seccomp-profile.json",
-  "service": "api",
-  "signed_ref": "api@sig:972bc433ce8678c8fff19f7714125de47823aed2dc863bbf2c4390b48c26d5bb",
-  "source_compose": "examples/dev/docker-compose.yml"
-}

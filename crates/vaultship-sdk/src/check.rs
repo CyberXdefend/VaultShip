@@ -6,8 +6,8 @@ pub fn validate(license_path: &str, public_key_base64: &[u8]) -> Result<()> {
     let license_data = std::fs::read_to_string(license_path)?;
     let license: vaultship_license::License = serde_json::from_str(&license_data)?;
 
-    let key_bytes =
-        base64::engine::general_purpose::STANDARD.decode(std::str::from_utf8(public_key_base64)?)?;
+    let key_bytes = base64::engine::general_purpose::STANDARD
+        .decode(std::str::from_utf8(public_key_base64)?)?;
     if key_bytes.len() != 32 {
         bail!("Public key must be 32 bytes (base64) for Ed25519");
     }

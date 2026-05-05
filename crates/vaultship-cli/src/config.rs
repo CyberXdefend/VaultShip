@@ -10,9 +10,13 @@ pub struct VaultShipConfig {
     pub license: Option<License>,
 }
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Profile { pub name: String }
+pub struct Profile {
+    pub name: String,
+}
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Project { pub name: String }
+pub struct Project {
+    pub name: String,
+}
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Harden {
     pub read_only: bool,
@@ -22,7 +26,10 @@ pub struct Harden {
     pub anti_debug: bool,
 }
 #[derive(Debug, Serialize, Deserialize)]
-pub struct License { pub product: String, pub public_key_path: String }
+pub struct License {
+    pub product: String,
+    pub public_key_path: String,
+}
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Bind {
     pub enabled: bool,

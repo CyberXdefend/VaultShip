@@ -3,6 +3,10 @@ pub mod dockerfile;
 pub mod readonly;
 pub mod seccomp;
 
+pub use capabilities::{default_add_capabilities, default_drop_capabilities};
+pub use dockerfile::suggest_runtime_base;
+pub use readonly::readonly_rootfs_enabled;
+
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use serde_yaml::{Mapping, Value};
@@ -33,9 +37,13 @@ pub fn generate_hardened_compose(service_name: &str, config: &HardenConfig) -> R
 
     if config.drop_capabilities {
         lines.push("    cap_drop:".to_string());
-        lines.push("      - ALL".to_string());
+        for cap in default_drop_capabilities() {
+            lines.push(format!("      - {cap}"));
+        }
         lines.push("    cap_add:".to_string());
-        lines.push("      - NET_BIND_SERVICE".to_string());
+        for cap in default_add_capabilities() {
+            lines.push(format!("      - {cap}"));
+        }
     }
 
     let seccomp = match &config.seccomp_profile {
@@ -73,11 +81,21 @@ pub fn harden_compose_document(compose_content: &str, config: &HardenConfig) -> 
         if config.drop_capabilities {
             service_map.insert(
                 Value::String("cap_drop".to_string()),
-                Value::Sequence(vec![Value::String("ALL".to_string())]),
+                Value::Sequence(
+                    default_drop_capabilities()
+                        .into_iter()
+                        .map(|c| Value::String(c.to_string()))
+                        .collect(),
+                ),
             );
             service_map.insert(
                 Value::String("cap_add".to_string()),
-                Value::Sequence(vec![Value::String("NET_BIND_SERVICE".to_string())]),
+                Value::Sequence(
+                    default_add_capabilities()
+                        .into_iter()
+                        .map(|c| Value::String(c.to_string()))
+                        .collect(),
+                ),
             );
         }
 

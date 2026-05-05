@@ -33,8 +33,8 @@ pub async fn run(image: &str) -> anyhow::Result<()> {
         anyhow::bail!("Key not found at {}", key_file.display());
     }
 
-    let key_raw =
-        base64::engine::general_purpose::STANDARD.decode(std::fs::read_to_string(&key_file)?.trim())?;
+    let key_raw = base64::engine::general_purpose::STANDARD
+        .decode(std::fs::read_to_string(&key_file)?.trim())?;
     let key: [u8; 32] = key_raw
         .try_into()
         .map_err(|_| anyhow::anyhow!("Invalid key length for {image_name}"))?;

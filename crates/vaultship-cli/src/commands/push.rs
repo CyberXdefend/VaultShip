@@ -35,7 +35,8 @@ pub async fn run(registry: &str) -> anyhow::Result<()> {
         }
         let service = file_name.trim_end_matches(".layer.enc.json");
         let reference = format!("{}/{}:latest", registry.trim_end_matches('/'), service);
-        let encrypted: EncryptedLayer = serde_json::from_str(&std::fs::read_to_string(entry.path())?)?;
+        let encrypted: EncryptedLayer =
+            serde_json::from_str(&std::fs::read_to_string(entry.path())?)?;
         vaultship_encrypt::registry::push_encrypted_layer(&reference, &encrypted).await?;
         println!("Pushed encrypted OCI artifact: {reference}");
         pushed += 1;

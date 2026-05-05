@@ -1,0 +1,15 @@
+{
+    "version": "0.1.0",
+    "description": "Encrypt, harden, bind, and sign container artifacts",
+    "homepage": "https://github.com/cyberxdefend/vaultship",
+    "license": "Apache-2.0",
+    "url": "https://github.com/cyberxdefend/vaultship/releases/download/v0.1.0/vaultship-v0.1.0-x86_64-pc-windows-msvc.zip",
+    "hash": "REPLACE_WITH_SHA256",
+    "bin": "vaultship.exe",
+    "checkver": {
+        "github": "https://github.com/cyberxdefend/vaultship"
+    },
+    "autoupdate": {
+        "url": "https://github.com/cyberxdefend/vaultship/releases/download/v$version/vaultship-v$version-x86_64-pc-windows-msvc.zip"
+    }
+}

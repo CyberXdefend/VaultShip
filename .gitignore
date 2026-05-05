@@ -33,3 +33,8 @@ vaultship_development.md
 license-*.key
 docker-compose.hardened.yml
 seccomp-profile.json
+vaultship.toml
+vaultship.private.key
+vaultship.layer.key
+vaultship.bind.json
+.vaultship/

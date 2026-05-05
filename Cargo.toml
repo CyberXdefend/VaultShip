@@ -7,6 +7,7 @@ members = [
     "crates/vaultship-license",
     "crates/vaultship-sign",
     "crates/vaultship-sdk",
+    "tests",
 ]
 
 [workspace.package]
@@ -14,7 +15,7 @@ version = "0.1.0"
 edition = "2024"
 authors = ["VaultShip Contributors <maintainers@vaultship.dev>"]
 license = "Apache-2.0"
-repository = "https://github.com/vaultship/vaultship"
+repository = "https://github.com/cyberxdefend/vaultship"
 description = "Protected container runtime - encrypt, license, and harden Docker containers"
 
 [workspace.dependencies]
@@ -41,6 +42,7 @@ sysinfo = "0.33"
 mac_address = "1"
 hostname = "0.4"
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+futures-util = "0.3"
 anyhow = "1"
 thiserror = "2"
 chrono = { version = "0.4", features = ["serde"] }

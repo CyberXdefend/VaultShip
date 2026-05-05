@@ -5,7 +5,9 @@ use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
 #[command(name = "vaultship")]
-#[command(about = "Protected container runtime - encrypt, bind, sign, and harden Docker containers")]
+#[command(
+    about = "Protected container runtime - encrypt, bind, sign, and harden Docker containers"
+)]
 #[command(version)]
 struct Cli {
     #[command(subcommand)]
@@ -18,7 +20,10 @@ enum Commands {
         #[arg(long, default_value = "baseline")]
         profile: String,
     },
-    Build { #[arg(default_value = ".")] path: String },
+    Build {
+        #[arg(default_value = ".")]
+        path: String,
+    },
     Encrypt {
         input: String,
         #[arg(long)]
@@ -33,8 +38,12 @@ enum Commands {
         #[arg(long, default_value = "vaultship.layer.key")]
         key_file: String,
     },
-    Push { registry: String },
-    Pull { image: String },
+    Push {
+        registry: String,
+    },
+    Pull {
+        image: String,
+    },
     Run {
         image: String,
         #[arg(long)]
@@ -50,13 +59,19 @@ enum Commands {
         #[arg(long)]
         license: Option<String>,
     },
-    Harden { #[arg(default_value = "docker-compose.yml")] compose_file: String },
+    Harden {
+        #[arg(default_value = "docker-compose.yml")]
+        compose_file: String,
+    },
     Inspect {
         image: String,
         #[arg(long)]
         json: bool,
     },
-    Keygen { #[arg(long, default_value = "vaultship")] name: String },
+    Keygen {
+        #[arg(long, default_value = "vaultship")]
+        name: String,
+    },
     Bind {
         #[arg(long, default_value = "vaultship.layer.key")]
         key_file: String,
@@ -72,6 +87,8 @@ enum Commands {
         image_or_ref: String,
         #[arg(long)]
         json: bool,
+        #[arg(long, default_value = "vaultship.public.key")]
+        public_key: String,
     },
     RotateKey {
         input: String,
@@ -82,8 +99,10 @@ enum Commands {
         #[arg(long)]
         output: Option<String>,
     },
-    #[command(hide = true)]
-    License { #[command(subcommand)] action: commands::license::LicenseCommands },
+    License {
+        #[command(subcommand)]
+        action: commands::license::LicenseCommands,
+    },
 }
 
 #[tokio::main]
@@ -142,16 +161,18 @@ async fn run_cli() -> anyhow::Result<()> {
             dry_run,
             extra_args,
             license,
-        } => commands::run::run(
-            &image,
-            bind_file.as_deref(),
-            &public_key,
-            dry_run,
-            &extra_args,
-            license.as_deref(),
-            &engine,
-        )
-        .await,
+        } => {
+            commands::run::run(
+                &image,
+                bind_file.as_deref(),
+                &public_key,
+                dry_run,
+                &extra_args,
+                license.as_deref(),
+                &engine,
+            )
+            .await
+        }
         Commands::Harden { compose_file } => commands::harden::run(&compose_file).await,
         Commands::Inspect { image, json } => commands::inspect::run(&image, json).await,
         Commands::Keygen { name } => commands::keygen::run(&name).await,
@@ -162,7 +183,11 @@ async fn run_cli() -> anyhow::Result<()> {
             output,
         } => commands::bind::create(&key_file, &private_key, fingerprint.as_deref(), &output).await,
         Commands::Fingerprint => commands::fingerprint::run().await,
-        Commands::Verify { image_or_ref, json } => commands::verify::run(&image_or_ref, json).await,
+        Commands::Verify {
+            image_or_ref,
+            json,
+            public_key,
+        } => commands::verify::run(&image_or_ref, json, &public_key).await,
         Commands::RotateKey {
             input,
             old_key,
@@ -183,7 +208,8 @@ fn map_exit_code(err: &anyhow::Error) -> i32 {
         23
     } else if msg.contains("compose") || msg.contains("harden") {
         24
-    } else if msg.contains("docker run failed") || msg.contains("podman") || msg.contains("nerdctl") {
+    } else if msg.contains("docker run failed") || msg.contains("podman") || msg.contains("nerdctl")
+    {
         25
     } else {
         1

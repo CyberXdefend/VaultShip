@@ -1,13 +1,33 @@
-PackageIdentifier: cyberxdefend.vaultship
+PackageIdentifier: cyberxdefend.VaultShip
 PackageVersion: 0.1.0
 PackageName: VaultShip
 Publisher: cyberxdefend
+PublisherUrl: https://github.com/cyberxdefend
+PublisherSupportUrl: https://github.com/cyberxdefend/vaultship/issues
 License: Apache-2.0
-ShortDescription: Protect container artifacts with encryption and hardening.
+LicenseUrl: https://github.com/cyberxdefend/vaultship/blob/main/LICENSE
+ShortDescription: Protect container artifacts with encryption, hardening, and signing.
+Description: >-
+  VaultShip encrypts Docker image layers with AES-256-GCM, hardens Docker Compose configs
+  (read-only filesystem, capability drops, seccomp profiles), binds artifacts to hardware
+  fingerprints, and signs image references using Ed25519 cryptography.
+Moniker: vaultship
+Tags:
+  - container
+  - docker
+  - security
+  - encryption
+  - hardening
+  - signing
+  - cli
 ManifestType: singleton
 ManifestVersion: 1.6.0
 Installers:
   - Architecture: x64
     InstallerType: zip
+    NestedInstallerType: portable
+    NestedInstallerFiles:
+      - RelativeFilePath: vaultship.exe
+        PortableCommandAlias: vaultship
     InstallerUrl: https://github.com/cyberxdefend/vaultship/releases/download/v0.1.0/vaultship-v0.1.0-x86_64-pc-windows-msvc.zip
     InstallerSha256: REPLACE_WITH_SHA256

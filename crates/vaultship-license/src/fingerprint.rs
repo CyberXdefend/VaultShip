@@ -40,10 +40,14 @@ impl HardwareFingerprint {
     pub fn verify_current(&self) -> Result<bool> {
         let current = Self::collect()?;
         let mut matches = 0;
-        if self.mac_addresses.iter().any(|m| current.mac_addresses.contains(m)) {
+        if self
+            .mac_addresses
+            .iter()
+            .any(|m| current.mac_addresses.contains(m))
+        {
             matches += 1;
         }
-        if self.disk_serial == current.disk_serial {
+        if self.disk_serial.is_some() && self.disk_serial == current.disk_serial {
             matches += 1;
         }
         if self.hostname == current.hostname {
@@ -67,9 +71,55 @@ fn collect_mac_addresses() -> Vec<String> {
     addrs
 }
 
+/// Attempts to read a real disk serial number via OS tools.
+/// Returns `None` rather than a device path when the serial cannot be determined.
 fn collect_disk_serial() -> Option<String> {
-    let disks = sysinfo::Disks::new_with_refreshed_list();
-    disks.iter().next().map(|d| d.name().to_string_lossy().to_string())
+    #[cfg(target_os = "linux")]
+    return collect_disk_serial_linux();
+
+    #[cfg(target_os = "macos")]
+    return collect_disk_serial_macos();
+
+    #[cfg(not(any(target_os = "linux", target_os = "macos")))]
+    None
+}
+
+#[cfg(target_os = "linux")]
+fn collect_disk_serial_linux() -> Option<String> {
+    let output = std::process::Command::new("lsblk")
+        .args(["--nodeps", "--output", "SERIAL", "--noheadings"])
+        .output()
+        .ok()?;
+    if !output.status.success() {
+        return None;
+    }
+    let text = String::from_utf8(output.stdout).ok()?;
+    text.lines()
+        .map(str::trim)
+        .find(|s| !s.is_empty())
+        .map(str::to_string)
+}
+
+#[cfg(target_os = "macos")]
+fn collect_disk_serial_macos() -> Option<String> {
+    let output = std::process::Command::new("system_profiler")
+        .args(["SPStorageDataType", "-json"])
+        .output()
+        .ok()?;
+    if !output.status.success() {
+        return None;
+    }
+    let v: serde_json::Value = serde_json::from_slice(&output.stdout).ok()?;
+    v["SPStorageDataType"].as_array()?.iter().find_map(|item| {
+        let serial = item["volume_uuid"]
+            .as_str()
+            .or_else(|| item["_rowIdentifier"].as_str())?;
+        if serial.is_empty() {
+            None
+        } else {
+            Some(serial.to_string())
+        }
+    })
 }
 
 fn collect_cpu_id() -> String {
